@@ -58,6 +58,11 @@ mvn spring-boot:run
    Once the application is running, you can access the following endpoints:
 
 - Place a new order: POST `http://localhost:8080/api/orders/place-order`
+  - Sample Request Body:
+  {
+    "pizzaType": "Quattro formaggi",
+    "note": "more cheese"
+  }
 - Get order status by ID: GET `http://localhost:8080/api/orders/{id}/status`
 - Get all orders: GET `http://localhost:8080/api/orders/all`
 
