@@ -44,9 +44,9 @@ These are Spring Boot applications for managing pizza orders and processing orde
 - Ensure you have Docker and Docker Compose installed on your system.
 - Navigate to the directory containing the `docker-compose.yaml` file.
 - Run the following command:
-  ```
+ ```
   docker-compose up -d
-  ```
+ ```
 
 4. **Run the Application**:
 
