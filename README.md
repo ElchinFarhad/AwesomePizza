@@ -61,9 +61,9 @@ mvn spring-boot:run
 - Get order status by ID: GET `http://localhost:8080/api/orders/{id}/status`
 - Get all orders: GET `http://localhost:8080/api/orders/all`
 
+
 6. **Access H2 Database**:
    - You can access the H2 database for the Awesome Pizza application at: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
-   - Database name: AwesomePizza
    - Username: sa (no password)
    
 
@@ -82,9 +82,9 @@ mvn spring-boot:run
 mvn spring-boot:run
 ```
 
+
 3. **Access H2 Database**:
    - You can access the H2 database for the Awesome Worker application at: [http://localhost:8081/h2-console](http://localhost:8081/h2-console)
-   - Database name: AwesomePizzaWorker
    - Username: sa (no password)
 
 ## Testing
