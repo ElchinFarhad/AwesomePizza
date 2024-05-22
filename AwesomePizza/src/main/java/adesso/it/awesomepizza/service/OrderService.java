@@ -35,6 +35,13 @@ public class OrderService {
         this.kafkaProducer = kafkaProducer;
     }
 
+    /**
+     * Places new order.
+     *
+     * @param orderDTO The order DTO containing order information.
+     * @throws DatabaseException If an error occurs while saving the order to the database.
+     * @throws ServiceException If an error occurs during JSON processing or placing the order.
+     */
     @Transactional
     public OrderDTO placeOrder(OrderDTO orderDTO) {
         try {
@@ -56,11 +63,13 @@ public class OrderService {
         }
     }
 
-    private void sendMessage(OrderDTO orderDTO) throws JsonProcessingException {
-        kafkaProducer.sendMessage(orderDTO);
-        logger.info("Order message sent successfully for order with id: {}", orderDTO.getOrderId());
-    }
-
+    /**
+     * Retrieves existing order status by ID.
+     *
+     * @param orderId The ID of the order to retrieve.
+     * @throws OrderNotFoundException If the order with the given ID is not found.
+     * @throws ServiceException       If an error occurs while retrieving the order status.
+     */
     public OrderDTO getOrderStatusById(String orderId) {
         try {
             Order order = getOrderById(orderId);
@@ -73,6 +82,17 @@ public class OrderService {
             logger.error("An error occurred while retrieving the order status.", ex);
             throw new ServiceException("An error occurred while retrieving the order status.", ex);
         }
+    }
+
+    /**
+     * Sends order message to Kafka.
+     *
+     * @param orderDTO The order DTO containing order information.
+     * @throws JsonProcessingException If an error occurs during JSON processing.
+     */
+    private void sendMessage(OrderDTO orderDTO) throws JsonProcessingException {
+        kafkaProducer.sendMessage(orderDTO);
+        logger.info("Order message sent successfully for order with id: {}", orderDTO.getOrderId());
     }
 
     public List<OrderDTO> getAllOrders() {
@@ -91,6 +111,13 @@ public class OrderService {
         }
     }
 
+    /**
+     * Processes pizza order message from Kafka.
+     *
+     * @param order The order to process.
+     * @throws DatabaseException If an error occurs while updating the order in the database.
+     * @throws ServiceException  If an error occurs while processing the order message.
+     */
     @Transactional
     public void processPizzaOrderMessage(Order order) {
         try {
@@ -129,6 +156,12 @@ public class OrderService {
                 });
     }
 
+    /**
+     * Updates order status and update time.
+     *
+     * @param order  The order to update.
+     * @param status The new status of the order.
+     */
     private void updateOrderStatus(Order order, String status) {
         order.setStatus(status);
         order.setUpdateTime(LocalDateTime.now());

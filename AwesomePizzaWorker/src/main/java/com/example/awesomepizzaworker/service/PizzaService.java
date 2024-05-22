@@ -32,6 +32,14 @@ public class PizzaService {
         this.kafkaProducer = kafkaProducer;
     }
 
+    /**
+     * Processes with pizza orders.
+     *
+     * @param pizzaDTO The pizza DTO containing order information.
+     * @throws ServiceException       If an error occurs while processing pending pizza orders.
+     * @throws DatabaseException      If a database error occurs.
+     * @throws OrderNotFoundException If the order with the given ID is not found.
+     */
     public void processPendingPizzaOrder(PizzaDTO pizzaDTO) {
         try {
             if (OrderStatus.PENDING.name().equals(pizzaDTO.getStatus())) {
