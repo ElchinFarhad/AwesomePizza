@@ -42,16 +42,12 @@ public class PizzaService {
      */
     public void processPendingPizzaOrder(PizzaDTO pizzaDTO) {
         try {
-            if (OrderStatus.PENDING.name().equals(pizzaDTO.getStatus())) {
                 Optional<Pizza> optionalExistingOrder = pizzaRepository.findByOrderId(pizzaDTO.getOrderId());
                 if (optionalExistingOrder.isPresent()) {
                     logger.info("Order already exists with id: {}", pizzaDTO.getId());
                 } else {
                     handleNewOrder(pizzaDTO);
                 }
-            } else if (OrderStatus.IN_PROGRESS.name().equals(pizzaDTO.getStatus())) {
-                handleInProgressOrder(pizzaDTO);
-            }
         } catch (JsonProcessingException e) {
             logger.error("Error processing pending pizza order", e);
             throw new ServiceException("Error processing pending pizza order", e);
