@@ -88,6 +88,13 @@ public class OrderService {
         }
     }
 
+
+    /**
+     * Retrieves all orders.
+     *
+     * @throws OrderNotFoundException If the order with the given ID is not found.
+     * @throws ServiceException       If an error occurs while retrieving the order status.
+     */
     public List<OrderDTO> getAllOrders() {
         try {
             List<Order> orders = orderRepository.findAll();
@@ -126,6 +133,9 @@ public class OrderService {
         }
     }
 
+    /**
+     * Generate Order ID
+     */
     private String generateOrderId() {
         int orderIdSuffix = orderIdCounter.getAndIncrement();
         return "ORD-" + String.format("%03d", orderIdSuffix);
@@ -168,6 +178,9 @@ public class OrderService {
         return orderDTO;
     }
 
+    /**
+     * Create OutBoxEventObject and write into database
+     */
     private void saveOutboxEvent(String aggregateType, String aggregateId, String eventType, String payload) {
         OutboxEvent event = new OutboxEvent();
         event.setAggregateType(aggregateType);

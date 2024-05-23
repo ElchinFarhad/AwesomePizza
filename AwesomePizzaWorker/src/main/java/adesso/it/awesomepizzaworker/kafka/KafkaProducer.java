@@ -1,9 +1,9 @@
-package adesso.it.awesomepizza.kafka;
-import adesso.it.awesomepizza.dto.OrderDTO;
+package adesso.it.awesomepizzaworker.kafka;
+
+import adesso.it.awesomepizzaworker.dto.PizzaDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -11,11 +11,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaProducer {
 
-    @Autowired
-    ObjectMapper objectMapper;
-
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final String topicName = "order-topic";
+    private final ObjectMapper objectMapper;
+
+    private final String topicName = "preparation-topic";
 
     public KafkaProducer(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
@@ -25,13 +24,12 @@ public class KafkaProducer {
     /**
      * Sends the order message to the Kafka topic.
      *
-     * @objectMapper for converting JSON messages to Order objects
-     * @param orderDto The order to be sent.
+     * @param pizzaDTO The pizza to be sent.
      * @throws JsonProcessingException if the order cannot be converted to JSON.
      */
-    public void sendMessage(OrderDTO orderDto) throws JsonProcessingException {
+    public void sendMessage(PizzaDTO pizzaDTO) throws JsonProcessingException {
         objectMapper.registerModule(new JavaTimeModule());
-        String jsonString = objectMapper.writeValueAsString(orderDto);
+        String jsonString = objectMapper.writeValueAsString(pizzaDTO);
         kafkaTemplate.send(topicName, jsonString);
     }
 }
