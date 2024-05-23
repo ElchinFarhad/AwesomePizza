@@ -3,12 +3,14 @@ package adesso.it.awesomepizza.service;
 import adesso.it.awesomepizza.dto.OrderDTO;
 import adesso.it.awesomepizza.entity.Order;
 import adesso.it.awesomepizza.entity.OrderStatus;
+import adesso.it.awesomepizza.entity.OutboxEvent;
 import adesso.it.awesomepizza.error.DatabaseException;
 import adesso.it.awesomepizza.error.OrderNotFoundException;
 import adesso.it.awesomepizza.error.ServiceException;
-import adesso.it.awesomepizza.kafka.KafkaProducer;
 import adesso.it.awesomepizza.repository.OrderRepository;
+import adesso.it.awesomepizza.repository.OutboxRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -17,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -26,13 +27,16 @@ public class OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
-    private final KafkaProducer kafkaProducer;
+    private final OutboxRepository outboxRepository;
+    private final ObjectMapper objectMapper;
+
     private final AtomicInteger orderIdCounter = new AtomicInteger(0);
 
 
-    public OrderService(OrderRepository orderRepository, KafkaProducer kafkaProducer) {
+    public OrderService(OrderRepository orderRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
-        this.kafkaProducer = kafkaProducer;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -48,7 +52,7 @@ public class OrderService {
             Order order = createOrderFromDTO(orderDTO);
             Order savedOrder = orderRepository.save(order);
             OrderDTO updatedOrderDTO =  convertToDTO(order);
-            sendMessage(updatedOrderDTO);
+            saveOutboxEvent("Order", updatedOrderDTO.getOrderId(), "OrderCreated", objectMapper.writeValueAsString(updatedOrderDTO));
             logger.info("Order placed successfully with id: {}", savedOrder.getOrderId());
             return convertToDTO(savedOrder);
         } catch (DataAccessException ex) {
@@ -82,17 +86,6 @@ public class OrderService {
             logger.error("An error occurred while retrieving the order status.", ex);
             throw new ServiceException("An error occurred while retrieving the order status.", ex);
         }
-    }
-
-    /**
-     * Sends order message to Kafka.
-     *
-     * @param orderDTO The order DTO containing order information.
-     * @throws JsonProcessingException If an error occurs during JSON processing.
-     */
-    private void sendMessage(OrderDTO orderDTO) throws JsonProcessingException {
-        kafkaProducer.sendMessage(orderDTO);
-        logger.info("Order message sent successfully for order with id: {}", orderDTO.getOrderId());
     }
 
     public List<OrderDTO> getAllOrders() {
@@ -137,6 +130,22 @@ public class OrderService {
         int orderIdSuffix = orderIdCounter.getAndIncrement();
         return "ORD-" + String.format("%03d", orderIdSuffix);
     }
+
+    private Order getOrderById(String orderId) {
+        return orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> {
+                    logger.error("Order not found with id: {}", orderId);
+                    return new OrderNotFoundException("Order not found with id: " + orderId);
+                });
+    }
+
+    private void updateOrderStatus(Order order, String status) {
+        order.setStatus(status);
+        order.setUpdateTime(LocalDateTime.now());
+        orderRepository.save(order);
+        logger.info("Updated order status to {} for order with id: {}", status, order.getOrderId());
+    }
+
     private Order createOrderFromDTO(OrderDTO orderDTO) {
         Order order = new Order();
         order.setOrderId(generateOrderId());
@@ -147,28 +156,6 @@ public class OrderService {
         order.setUpdateTime(null);
         return order;
     }
-
-    private Order getOrderById(String orderId) {
-        return orderRepository.findByOrderId(orderId)
-                .orElseThrow(() -> {
-                    logger.error("Order not found with id: {}", orderId);
-                    return new OrderNotFoundException("Order not found with id: " + orderId);
-                });
-    }
-
-    /**
-     * Updates order status and update time.
-     *
-     * @param order  The order to update.
-     * @param status The new status of the order.
-     */
-    private void updateOrderStatus(Order order, String status) {
-        order.setStatus(status);
-        order.setUpdateTime(LocalDateTime.now());
-        orderRepository.save(order);
-        logger.info("Updated order status to {} for order with id: {}", status, order.getOrderId());
-    }
-
     private OrderDTO convertToDTO(Order order) {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
@@ -179,5 +166,16 @@ public class OrderService {
         orderDTO.setOrderTime(order.getOrderTime());
         orderDTO.setUpdateTime(order.getUpdateTime());
         return orderDTO;
+    }
+
+    private void saveOutboxEvent(String aggregateType, String aggregateId, String eventType, String payload) {
+        OutboxEvent event = new OutboxEvent();
+        event.setAggregateType(aggregateType);
+        event.setAggregateId(aggregateId);
+        event.setEventType(eventType);
+        event.setPayload(payload);
+        event.setCreatedAt(LocalDateTime.now());
+        event.setProcessed(false);
+        outboxRepository.save(event);
     }
 }

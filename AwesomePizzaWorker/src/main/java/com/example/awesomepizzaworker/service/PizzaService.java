@@ -1,14 +1,17 @@
 package com.example.awesomepizzaworker.service;
 
 import com.example.awesomepizzaworker.dto.PizzaDTO;
+import com.example.awesomepizzaworker.entity.OutboxEvent;
 import com.example.awesomepizzaworker.entity.Pizza;
 import com.example.awesomepizzaworker.entity.OrderStatus;
 import com.example.awesomepizzaworker.error.DatabaseException;
 import com.example.awesomepizzaworker.error.OrderNotFoundException;
 import com.example.awesomepizzaworker.error.ServiceException;
 import com.example.awesomepizzaworker.kafka.KafkaProducer;
+import com.example.awesomepizzaworker.repository.OutboxRepository;
 import com.example.awesomepizzaworker.repository.PizzaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +27,17 @@ public class PizzaService {
     private static final Logger logger = LoggerFactory.getLogger(PizzaService.class);
 
     private final PizzaRepository pizzaRepository;
+    private final OutboxRepository outboxRepository;
     private final KafkaProducer kafkaProducer;
+    private final ObjectMapper objectMapper;
+
 
     @Autowired
-    public PizzaService(PizzaRepository pizzaRepository, KafkaProducer kafkaProducer) {
+    public PizzaService(PizzaRepository pizzaRepository, OutboxRepository outboxRepository, KafkaProducer kafkaProducer, ObjectMapper objectMapper) {
         this.pizzaRepository = pizzaRepository;
+        this.outboxRepository = outboxRepository;
         this.kafkaProducer = kafkaProducer;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -68,7 +76,7 @@ public class PizzaService {
         Pizza newOrder = createPizzaFromDTO(pizzaDTO);
         savePizza(newOrder);
         PizzaDTO newPizzaDTO = mapPizzaEntityToDTO(newOrder);
-        sendMessage(newPizzaDTO);
+        saveOutboxEvent("Pizza", newPizzaDTO.getOrderId(), "PizzaCreated", objectMapper.writeValueAsString(newPizzaDTO));
         processOrder();
         handleInProgressOrder(newPizzaDTO);
     }
@@ -77,7 +85,7 @@ public class PizzaService {
     public void handleInProgressOrder(PizzaDTO pizzaDTO) throws JsonProcessingException {
         pizzaDTO.setStatus(OrderStatus.COMPLETED.name());
         pizzaDTO.setUpdateTime(LocalDateTime.now());
-        sendMessage(pizzaDTO);
+        saveOutboxEvent("Pizza", pizzaDTO.getOrderId(), "PizzaCompleted", objectMapper.writeValueAsString(pizzaDTO));
     }
 
     public void sendMessage(PizzaDTO pizzaDTO) throws JsonProcessingException {
@@ -102,6 +110,16 @@ public class PizzaService {
         } catch (Exception e) {
             throw new DatabaseException("Error saving pizza order", e);
         }
+    }
+
+    private void saveOutboxEvent(String aggregateType, String aggregateId, String eventType, String payload) {
+        OutboxEvent event = new OutboxEvent();
+        event.setAggregateType(aggregateType);
+        event.setAggregateId(aggregateId);
+        event.setEventType(eventType);
+        event.setPayload(payload);
+        event.setCreatedAt(LocalDateTime.now());
+        outboxRepository.save(event);
     }
 
     private PizzaDTO mapPizzaEntityToDTO(Pizza pizza) {
