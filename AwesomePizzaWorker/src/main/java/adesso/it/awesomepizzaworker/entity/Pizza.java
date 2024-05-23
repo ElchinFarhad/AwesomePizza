@@ -1,15 +1,23 @@
-package com.example.awesomepizzaworker.dto;
+package adesso.it.awesomepizzaworker.entity;
+
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-public class PizzaDTO {
+@Entity
+@Table(name = "pizza_preparation")
+public class Pizza {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(unique = true, nullable = false)
     private String orderId;
+    @Column(nullable = false)
     private String pizzaType;
     private String note;
     private String status;
-    private LocalDateTime orderTime;
+    private LocalDateTime receivedTime;
     private LocalDateTime updateTime;
 
     public Long getId() {
@@ -27,7 +35,6 @@ public class PizzaDTO {
     public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
-
 
     public String getPizzaType() {
         return pizzaType;
@@ -53,12 +60,12 @@ public class PizzaDTO {
         this.status = status;
     }
 
-    public LocalDateTime getOrderTime() {
-        return orderTime;
+    public LocalDateTime getReceivedTime() {
+        return receivedTime;
     }
 
-    public void setOrderTime(LocalDateTime orderTime) {
-        this.orderTime = orderTime;
+    public void setReceivedTime(LocalDateTime receivedTime) {
+        this.receivedTime = receivedTime;
     }
 
     public LocalDateTime getUpdateTime() {
@@ -71,13 +78,13 @@ public class PizzaDTO {
 
     @Override
     public String toString() {
-        return "PizzaDTO{" +
+        return "Pizza{" +
                 "id=" + id +
-                ", orderID=" + orderId +
+                ", orderId=" + orderId +
                 ", pizzaType='" + pizzaType + '\'' +
                 ", note='" + note + '\'' +
                 ", status='" + status + '\'' +
-                ", receivedTime=" + orderTime +
+                ", receivedTime=" + receivedTime +
                 ", updateTime=" + updateTime +
                 '}';
     }

@@ -1,4 +1,4 @@
-package com.example.awesomepizzaworker.entity;
+package adesso.it.awesomepizzaworker.entity;
 
 public enum OrderStatus {
     PENDING,

@@ -1,6 +1,6 @@
-package com.example.awesomepizzaworker.repository;
+package adesso.it.awesomepizzaworker.repository;
 
-import com.example.awesomepizzaworker.entity.Pizza;
+import adesso.it.awesomepizzaworker.entity.Pizza;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

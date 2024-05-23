@@ -1,7 +1,7 @@
-package com.example.awesomepizzaworker.kafka;
+package adesso.it.awesomepizzaworker.kafka;
 
-import com.example.awesomepizzaworker.dto.PizzaDTO;
-import com.example.awesomepizzaworker.service.PizzaService;
+import adesso.it.awesomepizzaworker.service.PizzaService;
+import adesso.it.awesomepizzaworker.dto.PizzaDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

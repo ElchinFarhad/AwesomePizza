@@ -1,4 +1,4 @@
-package com.example.awesomepizzaworker.dto;
+package adesso.it.awesomepizzaworker.dto;
 
 public class ErrorResponseDTO {
 

@@ -1,6 +1,6 @@
-package com.example.awesomepizzaworker.kafka;
+package adesso.it.awesomepizzaworker.kafka;
 
-import com.example.awesomepizzaworker.dto.PizzaDTO;
+import adesso.it.awesomepizzaworker.dto.PizzaDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

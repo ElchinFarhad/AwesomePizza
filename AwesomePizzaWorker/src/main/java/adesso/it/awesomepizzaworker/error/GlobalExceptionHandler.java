@@ -1,6 +1,6 @@
-package com.example.awesomepizzaworker.error;
+package adesso.it.awesomepizzaworker.error;
 
-import com.example.awesomepizzaworker.dto.ErrorResponseDTO;
+import adesso.it.awesomepizzaworker.dto.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

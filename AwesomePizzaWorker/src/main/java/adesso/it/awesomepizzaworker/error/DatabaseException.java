@@ -1,4 +1,4 @@
-package com.example.awesomepizzaworker.error;
+package adesso.it.awesomepizzaworker.error;
 
 public class DatabaseException extends RuntimeException {
     public DatabaseException() {

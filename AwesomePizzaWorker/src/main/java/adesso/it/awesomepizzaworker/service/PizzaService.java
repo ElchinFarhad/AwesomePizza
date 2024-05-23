@@ -1,13 +1,13 @@
-package com.example.awesomepizzaworker.service;
+package adesso.it.awesomepizzaworker.service;
 
-import com.example.awesomepizzaworker.dto.PizzaDTO;
-import com.example.awesomepizzaworker.entity.Pizza;
-import com.example.awesomepizzaworker.entity.OrderStatus;
-import com.example.awesomepizzaworker.error.DatabaseException;
-import com.example.awesomepizzaworker.error.OrderNotFoundException;
-import com.example.awesomepizzaworker.error.ServiceException;
-import com.example.awesomepizzaworker.kafka.KafkaProducer;
-import com.example.awesomepizzaworker.repository.PizzaRepository;
+import adesso.it.awesomepizzaworker.dto.PizzaDTO;
+import adesso.it.awesomepizzaworker.entity.Pizza;
+import adesso.it.awesomepizzaworker.entity.OrderStatus;
+import adesso.it.awesomepizzaworker.error.DatabaseException;
+import adesso.it.awesomepizzaworker.error.OrderNotFoundException;
+import adesso.it.awesomepizzaworker.error.ServiceException;
+import adesso.it.awesomepizzaworker.kafka.KafkaProducer;
+import adesso.it.awesomepizzaworker.repository.PizzaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

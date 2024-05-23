@@ -1,12 +1,12 @@
-package com.example.awesomepizzaworker;
+package adesso.it.awesomepizzaworker;
 
-import com.example.awesomepizzaworker.dto.PizzaDTO;
-import com.example.awesomepizzaworker.entity.Pizza;
-import com.example.awesomepizzaworker.entity.OrderStatus;
-import com.example.awesomepizzaworker.error.DatabaseException;
-import com.example.awesomepizzaworker.kafka.KafkaProducer;
-import com.example.awesomepizzaworker.repository.PizzaRepository;
-import com.example.awesomepizzaworker.service.PizzaService;
+import adesso.it.awesomepizzaworker.dto.PizzaDTO;
+import adesso.it.awesomepizzaworker.entity.OrderStatus;
+import adesso.it.awesomepizzaworker.entity.Pizza;
+import adesso.it.awesomepizzaworker.error.DatabaseException;
+import adesso.it.awesomepizzaworker.kafka.KafkaProducer;
+import adesso.it.awesomepizzaworker.repository.PizzaRepository;
+import adesso.it.awesomepizzaworker.service.PizzaService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

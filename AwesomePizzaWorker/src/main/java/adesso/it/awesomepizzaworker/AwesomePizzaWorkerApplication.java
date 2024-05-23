@@ -1,4 +1,4 @@
-package com.example.awesomepizzaworker;
+package adesso.it.awesomepizzaworker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
