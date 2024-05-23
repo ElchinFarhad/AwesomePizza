@@ -74,9 +74,7 @@ public class OrderServiceTest {
         ArgumentCaptor<OutboxEvent> outboxCaptor = ArgumentCaptor.forClass(OutboxEvent.class);
         verify(outboxRepository, times(1)).save(outboxCaptor.capture());
         OutboxEvent outboxEvent = outboxCaptor.getValue();
-        assertEquals("Order", outboxEvent.getAggregateType());
         assertEquals(order.getOrderId(), outboxEvent.getAggregateId());
-        assertEquals("OrderCreated", outboxEvent.getEventType());
         assertEquals("orderPayload", outboxEvent.getPayload());
     }
 

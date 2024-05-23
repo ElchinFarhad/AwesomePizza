@@ -52,7 +52,7 @@ public class OrderService {
             Order order = createOrderFromDTO(orderDTO);
             Order savedOrder = orderRepository.save(order);
             OrderDTO updatedOrderDTO =  convertToDTO(order);
-            saveOutboxEvent("Order", updatedOrderDTO.getOrderId(), "OrderCreated", objectMapper.writeValueAsString(updatedOrderDTO));
+            saveOutboxEvent(updatedOrderDTO.getOrderId(), objectMapper.writeValueAsString(updatedOrderDTO));
             logger.info("Order placed successfully with id: {}", savedOrder.getOrderId());
             return convertToDTO(savedOrder);
         } catch (DataAccessException ex) {
@@ -181,11 +181,9 @@ public class OrderService {
     /**
      * Create OutBoxEventObject and write into database
      */
-    private void saveOutboxEvent(String aggregateType, String aggregateId, String eventType, String payload) {
+    private void saveOutboxEvent(String aggregateId, String payload) {
         OutboxEvent event = new OutboxEvent();
-        event.setAggregateType(aggregateType);
         event.setAggregateId(aggregateId);
-        event.setEventType(eventType);
         event.setPayload(payload);
         event.setCreatedAt(LocalDateTime.now());
         event.setProcessed(false);

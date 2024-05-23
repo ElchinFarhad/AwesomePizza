@@ -31,6 +31,5 @@ public class KafkaConsumer {
         objectMapper.registerModule(new JavaTimeModule());
         Order order = objectMapper.readValue(message, Order.class);
         orderService.processPizzaOrderMessage(order);
-
     }
 }

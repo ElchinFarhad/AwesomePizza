@@ -41,7 +41,7 @@ public class OutboxProcessingService {
                 kafkaProducer.sendMessage(orderDTO);
                 event.setProcessed(true);
                 outboxRepository.save(event);
-                logger.info("Processed outbox event for aggregateId: {} and type: {}", event.getAggregateId(), event.getEventType());
+                logger.info("Processed outbox event for aggregateId: {}", event.getAggregateId());
             } catch (JsonProcessingException e) {
                 logger.error("Error sending outbox event to Kafka", e);
             }
