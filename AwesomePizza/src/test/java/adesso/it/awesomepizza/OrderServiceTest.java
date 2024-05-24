@@ -69,7 +69,7 @@ public class OrderServiceTest {
 
     @Test
     public void testGetOrderStatusById() {
-        String orderId = "1";
+        String orderId = "ORD-123";
         Order order = new Order();
         order.setOrderId(orderId);
         order.setPizzaType("Margherita");
@@ -89,7 +89,7 @@ public class OrderServiceTest {
 
     @Test
     public void testGetOrderStatusById_NotFound() {
-        String orderId = "1";
+        String orderId = "ORD-123";
 
         when(orderRepository.findByOrderId(orderId)).thenReturn(Optional.empty());
         Exception exception = assertThrows(OrderNotFoundException.class, () -> {
@@ -102,7 +102,7 @@ public class OrderServiceTest {
 
     @Test
     public void testProcessPizzaOrderMessage() {
-        String orderId = "1";
+        String orderId = "ORD-123";
         Order existingOrder = new Order();
         existingOrder.setOrderId(orderId);
         existingOrder.setStatus("PENDING");

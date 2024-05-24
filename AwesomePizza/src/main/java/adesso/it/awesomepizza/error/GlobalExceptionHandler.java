@@ -1,7 +1,6 @@
 package adesso.it.awesomepizza.error;
 
 import adesso.it.awesomepizza.dto.ErrorResponseDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

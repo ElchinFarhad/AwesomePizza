@@ -29,7 +29,6 @@ public class KafkaConsumer {
      * @param message The incoming message as a JSON string.
      * @throws JsonProcessingException if the message cannot be parsed.
      */
-
     @KafkaListener(topics = "preparation-topic", groupId = "awesome-pizza-group")
     public void receiveMessage(String message) throws JsonProcessingException {
 

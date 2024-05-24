@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: order
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
+    volumes:
+      - ./postgres_order_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
@@ -17,6 +19,8 @@ services:
       POSTGRES_DB: worker
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
+    volumes:
+      - ./postgres_worker_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
 

@@ -76,8 +76,15 @@ public class PizzaService {
         sendMessage(pizzaDTO);
     }
 
+    /**
+     * Sends order message to Kafka.
+     *
+     * @param pizzaDTO The order DTO containing order information.
+     * @throws JsonProcessingException If an error occurs during JSON processing.
+     */
     public void sendMessage(PizzaDTO pizzaDTO) throws JsonProcessingException {
         kafkaProducer.sendMessage(pizzaDTO);
+        logger.info("Pizza message sent successfully : {}", pizzaDTO.getOrderId());
     }
 
     public Pizza createPizzaFromDTO(PizzaDTO pizzaDTO) {

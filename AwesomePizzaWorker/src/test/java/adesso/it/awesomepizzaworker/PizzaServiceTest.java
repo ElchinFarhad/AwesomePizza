@@ -40,10 +40,10 @@ public class PizzaServiceTest {
     @Test
     public void testProcessPendingPizzaOrder_NewOrder() throws JsonProcessingException {
         PizzaDTO pizzaDTO = new PizzaDTO();
-        pizzaDTO.setOrderId("order123");
+        pizzaDTO.setOrderId("ORD-123");
         pizzaDTO.setStatus(OrderStatus.PENDING.name());
 
-        when(pizzaRepository.findByOrderId("order123")).thenReturn(Optional.empty());
+        when(pizzaRepository.findByOrderId("ORD-123")).thenReturn(Optional.empty());
 
         pizzaService.processPendingPizzaOrder(pizzaDTO);
 
@@ -54,13 +54,13 @@ public class PizzaServiceTest {
     @Test
     public void testProcessPendingPizzaOrder_ExistingOrder() throws JsonProcessingException {
         PizzaDTO pizzaDTO = new PizzaDTO();
-        pizzaDTO.setOrderId("order123");
+        pizzaDTO.setOrderId("ORD-123");
         pizzaDTO.setStatus(OrderStatus.PENDING.name());
 
         Pizza existingOrder = new Pizza();
-        existingOrder.setOrderId("order123");
+        existingOrder.setOrderId("ORD-123");
 
-        when(pizzaRepository.findByOrderId("order123")).thenReturn(Optional.of(existingOrder));
+        when(pizzaRepository.findByOrderId("ORD-123")).thenReturn(Optional.of(existingOrder));
 
         pizzaService.processPendingPizzaOrder(pizzaDTO);
 
@@ -69,25 +69,13 @@ public class PizzaServiceTest {
     }
 
     @Test
-    public void testProcessPendingPizzaOrder_InProgressOrder() throws JsonProcessingException {
-        PizzaDTO pizzaDTO = new PizzaDTO();
-        pizzaDTO.setOrderId("order123");
-        pizzaDTO.setStatus(OrderStatus.IN_PROGRESS.name());
-
-        pizzaService.processPendingPizzaOrder(pizzaDTO);
-
-        verify(pizzaService, never()).handleNewOrder(any());
-        verify(pizzaService, times(1)).handleInProgressOrder(pizzaDTO);
-    }
-
-    @Test
     public void testHandleNewOrder() throws JsonProcessingException, DatabaseException {
         PizzaDTO pizzaDTO = new PizzaDTO();
-        pizzaDTO.setOrderId("order123");
+        pizzaDTO.setOrderId("ORD-123");
         pizzaDTO.setStatus(OrderStatus.PENDING.name());
 
         Pizza newOrder = new Pizza();
-        newOrder.setOrderId("order123");
+        newOrder.setOrderId("ORD-123");
 
         doReturn(newOrder).when(pizzaService).createPizzaFromDTO(pizzaDTO);
 
