@@ -2,9 +2,9 @@ version: '2'
 services:
   postgres-order:
     image: postgres:15
-    container_name: postgres-container-orchestrator
+    container_name: postgres-container-order
     environment:
-      POSTGRES_DB: test
+      POSTGRES_DB: order
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
     ports:
@@ -14,7 +14,7 @@ services:
     image: postgres:15
     container_name: postgres-container-worker
     environment:
-      POSTGRES_DB: test
+      POSTGRES_DB: worker
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
     ports:
