@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class OutboxProcessingService {
      * Process outbox events periodically.
      * This method is scheduled to run every 4 seconds for sending message to kafka .
      */
+    @Transactional
     @Scheduled(fixedRate = 4000)
     public void processOutboxEvents() {
         logger.info("Starting to process outbox events");
