@@ -9,10 +9,11 @@ import java.time.LocalDateTime;
 public class Pizza {
 
     @Id
+    @SequenceGenerator(name = "worker_id_seq", sequenceName = "worker_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column(unique = true, nullable = false)
-    private String orderId;
+    private Long orderId;
     @Column(nullable = false)
     private String pizzaType;
     private String note;
@@ -28,11 +29,11 @@ public class Pizza {
         this.id = id;
     }
 
-    public String getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(String orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 

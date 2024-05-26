@@ -30,9 +30,6 @@ public class OrderService {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
-    private final AtomicInteger orderIdCounter = new AtomicInteger(0);
-
-
     public OrderService(OrderRepository orderRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
         this.outboxRepository = outboxRepository;
@@ -52,8 +49,8 @@ public class OrderService {
             Order order = createOrderFromDTO(orderDTO);
             Order savedOrder = orderRepository.save(order);
             OrderDTO updatedOrderDTO =  convertToDTO(order);
-            saveOutboxEvent(updatedOrderDTO.getOrderId(), objectMapper.writeValueAsString(updatedOrderDTO));
-            logger.info("Order placed successfully with id: {}", savedOrder.getOrderId());
+            saveOutboxEvent(updatedOrderDTO.getId(), objectMapper.writeValueAsString(updatedOrderDTO));
+            logger.info("Order placed successfully with id: {}", savedOrder.getId());
             return convertToDTO(savedOrder);
         } catch (DataAccessException ex) {
             logger.error("Error saving the order to the database.", ex);
@@ -70,17 +67,17 @@ public class OrderService {
     /**
      * Retrieves existing order status by ID.
      *
-     * @param orderId The ID of the order to retrieve.
+     * @param id The ID of the order to retrieve.
      * @throws OrderNotFoundException If the order with the given ID is not found.
      * @throws ServiceException       If an error occurs while retrieving the order status.
      */
-    public OrderDTO getOrderStatusById(String orderId) {
+    public OrderDTO getOrderStatusById(Long id) {
         try {
-            Order order = getOrderById(orderId);
-            logger.info("Retrieved order status successfully for order with id: {}", orderId);
+            Order order = getOrderById(id);
+            logger.info("Retrieved order status successfully for order with id: {}", id);
             return convertToDTO(order);
         } catch (OrderNotFoundException ex) {
-            logger.error("Order not found with id: {}", orderId, ex);
+            logger.error("Order not found with id: {}", id, ex);
             throw ex;
         } catch (Exception ex) {
             logger.error("An error occurred while retrieving the order status.", ex);
@@ -121,9 +118,9 @@ public class OrderService {
     @Transactional
     public void processPizzaOrderMessage(Order order) {
         try {
-            Order existingOrder = getOrderById(order.getOrderId());
+            Order existingOrder = getOrderById(order.getId());
             updateOrderStatus(existingOrder, order.getStatus());
-            logger.info("Processed pizza order message successfully for order with id: {}", order.getOrderId());
+            logger.info("Processed pizza order message successfully for order with id: {}", order.getId());
         } catch (DataAccessException ex) {
             logger.error("Error updating the order in the database.", ex);
             throw new DatabaseException("Error updating the order in the database.", ex);
@@ -133,19 +130,12 @@ public class OrderService {
         }
     }
 
-    /**
-     * Generate Order ID
-     */
-    private String generateOrderId() {
-        int orderIdSuffix = orderIdCounter.getAndIncrement();
-        return "ORD-" + String.format("%03d", orderIdSuffix);
-    }
 
-    private Order getOrderById(String orderId) {
-        return orderRepository.findByOrderId(orderId)
+    private Order getOrderById(Long id) {
+        return orderRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.error("Order not found with id: {}", orderId);
-                    return new OrderNotFoundException("Order not found with id: " + orderId);
+                    logger.error("Order not found with id: {}", id);
+                    return new OrderNotFoundException("Order not found with id: " + id);
                 });
     }
 
@@ -153,12 +143,12 @@ public class OrderService {
         order.setStatus(status);
         order.setUpdateTime(LocalDateTime.now());
         orderRepository.save(order);
-        logger.info("Updated order status to {} for order with id: {}", status, order.getOrderId());
+        logger.info("Updated order status to {} for order with id: {}", status, order.getId());
     }
 
     private Order createOrderFromDTO(OrderDTO orderDTO) {
         Order order = new Order();
-        order.setOrderId(generateOrderId());
+        order.setId(order.getId());
         order.setPizzaType(orderDTO.getPizzaType());
         order.setStatus(OrderStatus.PENDING.name());
         order.setNote(orderDTO.getNote());
@@ -169,7 +159,7 @@ public class OrderService {
     private OrderDTO convertToDTO(Order order) {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
-        orderDTO.setOrderId(order.getOrderId());
+        orderDTO.setId(order.getId());
         orderDTO.setPizzaType(order.getPizzaType());
         orderDTO.setStatus(order.getStatus());
         orderDTO.setNote(order.getNote());
@@ -181,7 +171,7 @@ public class OrderService {
     /**
      * Create OutBoxEventObject and write into database
      */
-    private void saveOutboxEvent(String aggregateId, String payload) {
+    public void saveOutboxEvent(Long aggregateId, String payload) {
         OutboxEvent event = new OutboxEvent();
         event.setAggregateId(aggregateId);
         event.setPayload(payload);

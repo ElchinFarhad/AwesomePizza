@@ -2,21 +2,20 @@ package adesso.it.awesomepizza.dto;
 
 import java.time.LocalDateTime;
 
-public class OrderDTO {
-
-    private Long id;
+public class KafkaOrderDTO {
+    private Long orderId;
     private String pizzaType;
     private String note;
     private String status;
     private LocalDateTime orderTime;
     private LocalDateTime updateTime;
 
-    public Long getId() {
-        return id;
+    public Long getOrderId() {
+        return orderId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
     public String getPizzaType() {
@@ -57,17 +56,5 @@ public class OrderDTO {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
-    }
-
-    @Override
-    public String toString() {
-        return "OrderDTO{" +
-                "id=" + id +
-                ", pizzaType='" + pizzaType + '\'' +
-                ", note='" + note + '\'' +
-                ", status='" + status + '\'' +
-                ", orderTime=" + orderTime +
-                ", updateTime=" + updateTime +
-                '}';
     }
 }

@@ -38,10 +38,10 @@ public class OutboxProcessingServiceTest {
     @Test
     public void testProcessOutboxEvents() throws JsonProcessingException {
         PizzaDTO pizzaDTO = new PizzaDTO();
-        pizzaDTO.setOrderId("ORD-123");
+        pizzaDTO.setOrderId(1L);
         OutboxEvent event = new OutboxEvent();
         event.setId(1L);
-        event.setPayload("{\"orderId\":\"ORD-123\"}");
+        event.setPayload("{\"orderId\":\"1L\"}");
         event.setProcessed(false);
         List<OutboxEvent> events = Collections.singletonList(event);
 

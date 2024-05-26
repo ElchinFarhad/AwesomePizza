@@ -3,17 +3,18 @@ package adesso.it.awesomepizzaworker.service;
 import adesso.it.awesomepizzaworker.dto.PizzaDTO;
 import adesso.it.awesomepizzaworker.entity.OutboxEvent;
 import adesso.it.awesomepizzaworker.entity.Pizza;
+import adesso.it.awesomepizzaworker.entity.OrderStatus;
 import adesso.it.awesomepizzaworker.error.DatabaseException;
 import adesso.it.awesomepizzaworker.error.OrderNotFoundException;
 import adesso.it.awesomepizzaworker.error.ServiceException;
 import adesso.it.awesomepizzaworker.repository.OutboxRepository;
 import adesso.it.awesomepizzaworker.repository.PizzaRepository;
-import adesso.it.awesomepizzaworker.entity.OrderStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,6 @@ public class PizzaService {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
-
     public PizzaService(PizzaRepository pizzaRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper) {
         this.pizzaRepository = pizzaRepository;
         this.outboxRepository = outboxRepository;
@@ -36,7 +36,7 @@ public class PizzaService {
     }
 
     /**
-     * Processes with pizza orders.
+     * Processes pending pizza orders.
      *
      * @param pizzaDTO The pizza DTO containing order information.
      * @throws ServiceException       If an error occurs while processing pending pizza orders.
@@ -51,32 +51,31 @@ public class PizzaService {
             } else {
                 handleNewOrder(pizzaDTO);
             }
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException | DatabaseException e) {
             logger.error("Error processing pending pizza order", e);
             throw new ServiceException("Error processing pending pizza order", e);
-        } catch (DatabaseException e) {
-            logger.error("Database error occurred", e);
-            throw new DatabaseException("Database error occurred", e);
-        } catch (OrderNotFoundException e) {
-            logger.error("Order not found with id: {}", pizzaDTO.getOrderId(), e);
-            throw new OrderNotFoundException("Order not found with id: " + pizzaDTO.getOrderId(), e);
         }
     }
+
     @Transactional
     public void handleNewOrder(PizzaDTO pizzaDTO) throws JsonProcessingException, DatabaseException {
         Pizza newOrder = createPizzaFromDTO(pizzaDTO);
         savePizza(newOrder);
         PizzaDTO newPizzaDTO = mapPizzaEntityToDTO(newOrder);
-        saveOutboxEvent(pizzaDTO.getOrderId(), objectMapper.writeValueAsString(pizzaDTO));
+        saveOutboxEvent(newPizzaDTO.getOrderId(), objectMapper.writeValueAsString(newPizzaDTO));
         processOrder();
-        handleInProgressOrder(newPizzaDTO);
+        updateOrderStatusInNewTransaction(newOrder.getOrderId(), OrderStatus.COMPLETED.name());
     }
 
-    @Transactional
-    public void handleInProgressOrder(PizzaDTO pizzaDTO) throws JsonProcessingException {
-        pizzaDTO.setStatus(OrderStatus.COMPLETED.name());
-        pizzaDTO.setUpdateTime(LocalDateTime.now());
-        saveOutboxEvent(pizzaDTO.getOrderId(), objectMapper.writeValueAsString(pizzaDTO));
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateOrderStatusInNewTransaction(Long orderId, String status) throws JsonProcessingException {
+        Pizza existingOrder = pizzaRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+        existingOrder.setStatus(status);
+        existingOrder.setUpdateTime(LocalDateTime.now());
+        savePizza(existingOrder);
+        PizzaDTO updatedPizzaDTO = mapPizzaEntityToDTO(existingOrder);
+        saveOutboxEvent(updatedPizzaDTO.getOrderId(), objectMapper.writeValueAsString(updatedPizzaDTO));
     }
 
     @Transactional(rollbackFor = DatabaseException.class)
@@ -99,7 +98,7 @@ public class PizzaService {
         return newOrder;
     }
 
-    public void saveOutboxEvent(String aggregateId, String payload) {
+    public void saveOutboxEvent(Long aggregateId, String payload) {
         OutboxEvent event = new OutboxEvent();
         event.setAggregateId(aggregateId);
         event.setPayload(payload);

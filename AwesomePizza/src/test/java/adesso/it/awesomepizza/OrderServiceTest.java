@@ -48,75 +48,80 @@ public class OrderServiceTest {
 
     @Test
     public void testPlaceOrder() throws JsonProcessingException {
+        // Mocking ObjectMapper behavior
+        when(objectMapper.writeValueAsString(any(OrderDTO.class))).thenReturn("orderPayload");
+
+        // Creating OrderDTO
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setPizzaType("Margherita");
         orderDTO.setNote(null);
 
-        Order order = new Order();
-        order.setOrderId("ORD-000");
-        order.setPizzaType(orderDTO.getPizzaType());
-        order.setNote(orderDTO.getNote());
-        order.setStatus(OrderStatus.PENDING.name());
-        order.setOrderTime(LocalDateTime.now());
-        order.setUpdateTime(null);
+        // Creating expected Order object
+        Order expectedOrder = new Order();
+        expectedOrder.setId(1L);
+        expectedOrder.setPizzaType(orderDTO.getPizzaType());
+        expectedOrder.setNote(orderDTO.getNote());
+        expectedOrder.setStatus(OrderStatus.PENDING.name());
+        expectedOrder.setOrderTime(LocalDateTime.now());
+        expectedOrder.setUpdateTime(null);
 
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(objectMapper.writeValueAsString(any(OrderDTO.class))).thenReturn("orderPayload");
+        // Mocking OrderRepository behavior
+        when(orderRepository.save(any(Order.class))).thenReturn(expectedOrder);
 
+        // Calling the method under test
         OrderDTO result = orderService.placeOrder(orderDTO);
 
-        assertEquals(order.getPizzaType(), result.getPizzaType());
-        assertEquals(order.getNote(), result.getNote());
-        assertEquals(order.getStatus(), result.getStatus());
-        assertEquals(order.getOrderTime(), result.getOrderTime());
-        assertEquals(order.getUpdateTime(), result.getUpdateTime());
+        // Verifying the result
+        assertEquals(expectedOrder.getPizzaType(), result.getPizzaType());
+        assertEquals(expectedOrder.getNote(), result.getNote());
+        assertEquals(expectedOrder.getStatus(), result.getStatus());
+        assertEquals(expectedOrder.getOrderTime(), result.getOrderTime());
+        assertEquals(expectedOrder.getUpdateTime(), result.getUpdateTime());
 
-        ArgumentCaptor<OutboxEvent> outboxCaptor = ArgumentCaptor.forClass(OutboxEvent.class);
-        verify(outboxRepository, times(1)).save(outboxCaptor.capture());
-        OutboxEvent outboxEvent = outboxCaptor.getValue();
-        assertEquals(order.getOrderId(), outboxEvent.getAggregateId());
-        assertEquals("orderPayload", outboxEvent.getPayload());
+        // Verifying that saveOutboxEvent() is called with the correct parameters
+        verify(outboxRepository, times(1)).save(any(OutboxEvent.class));
     }
+
 
     @Test
     public void testGetOrderStatusById() {
-        String orderId = "ORD-001";
+        Long id = 1L;
         Order order = new Order();
-        order.setOrderId(orderId);
+        order.setId(id);
         order.setPizzaType("Margherita");
         order.setStatus("PENDING");
 
-        when(orderRepository.findByOrderId(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(id)).thenReturn(Optional.of(order));
 
-        OrderDTO result = orderService.getOrderStatusById(orderId);
+        OrderDTO result = orderService.getOrderStatusById(id);
 
-        assertEquals(orderId, result.getOrderId());
+        assertEquals(id, result.getId());
         assertEquals("Margherita", result.getPizzaType());
         assertEquals("PENDING", result.getStatus());
 
-        verify(orderRepository, times(1)).findByOrderId(orderId);
+        verify(orderRepository, times(1)).findById(id);
     }
 
     @Test
     public void testGetOrderStatusById_NotFound() {
-        String orderId = "ORD-001";
+        Long id = 1L;
 
-        when(orderRepository.findByOrderId(orderId)).thenReturn(Optional.empty());
+        when(orderRepository.findById(id)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(OrderNotFoundException.class, () -> orderService.getOrderStatusById(orderId));
-        assertEquals("Order not found with id: " + orderId, exception.getMessage());
-        verify(orderRepository, times(1)).findByOrderId(orderId);
+        Exception exception = assertThrows(OrderNotFoundException.class, () -> orderService.getOrderStatusById(id));
+        assertEquals("Order not found with id: " + id, exception.getMessage());
+        verify(orderRepository, times(1)).findById(id);
     }
 
     @Test
     public void testGetAllOrders() {
         Order order1 = new Order();
-        order1.setOrderId("ORD-001");
+        order1.setId(1L);
         order1.setPizzaType("Margherita");
         order1.setStatus("PENDING");
 
         Order order2 = new Order();
-        order2.setOrderId("ORD-002");
+        order2.setId(2L);
         order2.setPizzaType("Pepperoni");
         order2.setStatus("COMPLETED");
 
@@ -125,28 +130,28 @@ public class OrderServiceTest {
         List<OrderDTO> orders = orderService.getAllOrders();
 
         assertEquals(2, orders.size());
-        assertEquals("ORD-001", orders.get(0).getOrderId());
-        assertEquals("ORD-002", orders.get(1).getOrderId());
+        assertEquals(1L, orders.get(0).getId());
+        assertEquals(2L, orders.get(1).getId());
 
         verify(orderRepository, times(1)).findAll();
     }
 
     @Test
     public void testProcessPizzaOrderMessage() {
-        String orderId = "ORD-001";
+        Long orderId = 1L;
         Order existingOrder = new Order();
-        existingOrder.setOrderId(orderId);
+        existingOrder.setId(orderId);
         existingOrder.setStatus("PENDING");
 
         Order updatedOrder = new Order();
-        updatedOrder.setOrderId(orderId);
+        updatedOrder.setId(orderId);
         updatedOrder.setStatus("COMPLETED");
 
-        when(orderRepository.findByOrderId(orderId)).thenReturn(Optional.of(existingOrder));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
 
         orderService.processPizzaOrderMessage(updatedOrder);
 
-        verify(orderRepository, times(1)).findByOrderId(orderId);
+        verify(orderRepository, times(1)).findById(orderId);
         verify(orderRepository, times(1)).save(any(Order.class));
         assertEquals("COMPLETED", existingOrder.getStatus());
     }

@@ -22,13 +22,13 @@ public class OrderController {
     }
 
     @PostMapping("/place-order")
-    public ResponseEntity<OrderDTO> placeOrder(@Valid @RequestBody OrderDTO orderDTO, BindingResult result) {
+    public ResponseEntity<OrderDTO> placeOrder(@Valid @RequestBody OrderDTO orderDTO) {
         OrderDTO placedOrder = orderService.placeOrder(orderDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(placedOrder);
     }
 
     @GetMapping("/{id}/status")
-    public ResponseEntity<OrderDTO> getOrderStatusById(@Valid @PathVariable String id) {
+    public ResponseEntity<OrderDTO> getOrderStatusById(@Valid @PathVariable Long id) {
         OrderDTO orderDTO = orderService.getOrderStatusById(id);
         return ResponseEntity.ok(orderDTO);
     }

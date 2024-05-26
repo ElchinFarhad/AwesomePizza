@@ -12,7 +12,7 @@ public class OutboxEvent {
     private Long id;
 
     @Column(name = "aggregate_id", nullable = false)
-    private String aggregateId;
+    private Long aggregateId;
 
     @Column(name = "payload", nullable = false, columnDefinition = "TEXT")
     private String payload;
@@ -32,11 +32,11 @@ public class OutboxEvent {
         this.id = id;
     }
 
-    public String getAggregateId() {
+    public Long getAggregateId() {
         return aggregateId;
     }
 
-    public void setAggregateId(String aggregateId) {
+    public void setAggregateId(Long aggregateId) {
         this.aggregateId = aggregateId;
     }
 

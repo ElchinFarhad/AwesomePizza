@@ -9,11 +9,12 @@ import java.time.LocalDateTime;
 public class OutboxEvent {
 
     @Id
+    @SequenceGenerator(name = "outbox_worker_id_seq", sequenceName = "outbox_worker_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "aggregate_id", nullable = false)
-    private String aggregateId;
+    private Long aggregateId;
 
     @Lob
     @Column(name = "payload", nullable = false, columnDefinition = "TEXT")
@@ -34,11 +35,11 @@ public class OutboxEvent {
         this.id = id;
     }
 
-    public String getAggregateId() {
+    public Long getAggregateId() {
         return aggregateId;
     }
 
-    public void setAggregateId(String aggregateId) {
+    public void setAggregateId(Long aggregateId) {
         this.aggregateId = aggregateId;
     }
 

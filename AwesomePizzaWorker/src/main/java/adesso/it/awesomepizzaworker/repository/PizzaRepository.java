@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface PizzaRepository extends JpaRepository<Pizza, Long> {
-    Optional<Pizza> findByOrderId (String orderId);
+    Optional<Pizza> findByOrderId (Long orderId);
 }

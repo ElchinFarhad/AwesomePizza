@@ -1,5 +1,6 @@
 package adesso.it.awesomepizza.kafka;
 
+import adesso.it.awesomepizza.dto.KafkaOrderDTO;
 import adesso.it.awesomepizza.entity.Order;
 import adesso.it.awesomepizza.service.OrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,7 +30,15 @@ public class KafkaConsumer {
     @KafkaListener(topics = "preparation-topic", groupId = "awesome-pizza-group")
     public void receiveMessage(String message) throws JsonProcessingException {
         objectMapper.registerModule(new JavaTimeModule());
-        Order order = objectMapper.readValue(message, Order.class);
+        KafkaOrderDTO kafkaOrderDTO = objectMapper.readValue(message, KafkaOrderDTO.class);
+
+        Order order = new Order();
+        order.setId(kafkaOrderDTO.getOrderId());
+        order.setPizzaType(kafkaOrderDTO.getPizzaType());
+        order.setNote(kafkaOrderDTO.getNote());
+        order.setStatus(kafkaOrderDTO.getStatus());
+        order.setOrderTime(kafkaOrderDTO.getOrderTime());
+        order.setUpdateTime(kafkaOrderDTO.getUpdateTime());
         orderService.processPizzaOrderMessage(order);
     }
 }

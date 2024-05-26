@@ -7,13 +7,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "pizza_order")
 public class Order {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "order_id_seq", sequenceName = "order_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_id_seq")
     private Long id;
-    @NotBlank(message = "orderId is mandatory")
-    @Column(unique = true, nullable = false)
-    private String orderId;
     @NotBlank(message = "Name is mandatory")
     @Column(nullable = false)
     private String pizzaType;
@@ -28,14 +25,6 @@ public class Order {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
     }
 
     public String getPizzaType() {
@@ -82,7 +71,6 @@ public class Order {
     public String toString() {
         return "Order{" +
                 "id=" + id +
-                ", orderId=" + orderId +
                 ", pizzaType='" + pizzaType + '\'' +
                 ", note='" + note + '\'' +
                 ", status='" + status + '\'' +

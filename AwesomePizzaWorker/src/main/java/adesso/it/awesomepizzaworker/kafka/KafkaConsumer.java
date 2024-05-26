@@ -24,6 +24,8 @@ public class KafkaConsumer {
     @KafkaListener(topics = "order-topic", groupId = "awesome-pizza-group")
     public void receiveMessage(String message) throws JsonProcessingException {
         PizzaDTO pizzaDTO = objectMapper.readValue(message, PizzaDTO.class);
+        pizzaDTO.setOrderId(pizzaDTO.getId());
+        pizzaDTO.setId(null);
         pizzaService.processPendingPizzaOrder(pizzaDTO);
     }
 }

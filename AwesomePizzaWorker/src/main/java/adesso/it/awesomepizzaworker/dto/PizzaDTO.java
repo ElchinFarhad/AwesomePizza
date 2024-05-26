@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class PizzaDTO {
 
     private Long id;
-    private String orderId;
+    private Long orderId;
     private String pizzaType;
     private String note;
     private String status;
@@ -20,11 +20,11 @@ public class PizzaDTO {
         this.id = id;
     }
 
-    public String getOrderId() {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(String orderId) {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 
